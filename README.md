@@ -21,7 +21,6 @@ Express.js는 Node.js REST API를 만들기위한 좋은 프레임워크이다. 
     | app.js
     ├─api
     ├─config
-    ├─controllers
     ├─jobs
     ├─loaders
     ├─models
