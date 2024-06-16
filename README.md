@@ -1,4 +1,4 @@
-# bulletproof-node.js-project-architecture-ko
+# 😊 bulletproof-node.js-project-architecture-ko (Korean Version)
 
 > Santiage Quinteros 의 "Bulletproof node.js project architecture" 를 기반하여 한글버전으로 doc를 작성한다.
 
@@ -21,38 +21,10 @@ Express.js는 Node.js REST API를 만들기위한 좋은 프레임워크이다. 
     | app.js
     ├─api
     ├─config
+    ├─controllers
     ├─jobs
     ├─loaders
     ├─models
     ├─services
     └─subscribers
-```
-
-### DDD(Domain-Driven Design) 방식에서의 구조
-
-```
-    src
-    | app.js
-    ├─config
-    ├─loaders
-    ├─common
-    |  ├─models
-    |  ├─services
-    |  ├─utils
-    |  ├─exceptions
-    |  └─middlewares
-    ├─feature1
-    |  ├─controllers
-    |  ├─models
-    |  ├─services
-    |  ├─routes
-    |  ├─subscribers
-    |  └─jobs
-    └─feature2
-        ├─controllers
-        ├─models
-        ├─services
-        ├─routes
-        ├─subscribers
-        └─jobs
 ```
