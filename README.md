@@ -2,6 +2,15 @@
 
 > Santiage Quinteros 의 "Bulletproof node.js project architecture" 를 기반하여 한글버전으로 doc를 작성한다.
 
+## 목차
+
+1. [서론](#서론)
+2. [폴더 구조](#폴더-구조-🏢)
+    - [일반적인 형태의 구조](#일반적인-형태의-구조)
+    - [폴더 설명](#폴더-설명)
+3. [3 Layer Architecture](#3-layer-architecture-🥪)
+    - [비즈니스 로직을 Controllers에 넣지 말자](#비즈니스-로직을-Controllers에-넣지-말자)
+
 ## 서론
 
 Express.js는 Node.js REST API를 만들기위한 좋은 프레임워크이다. 그러나 당신이 Node.js Project를 구성할 때 어떠한 **단서**도 주지않는다.
@@ -56,7 +65,7 @@ Express.js는 Node.js REST API를 만들기위한 좋은 프레임워크이다. 
 
 ![https://www.softwareontheroad.com/ideal-nodejs-project-structure/](./images/3-layer-architecture.png)
 
-### 비즈니스 로직을 Controllers에 넣지말자
+### 비즈니스 로직을 Controllers에 넣지 말자
 
 Express.js Controller에 비즈니스 로직을 포함하는 것은 편리할 수도 있다. 하지만 이는 스파게티 코드가 될 수 있는 지름길이다. 또한 Unit Test를 작성해야할 때는 복잡한 Mock 객체들을 다루어야 할 가능성이 높다.
 
@@ -102,7 +111,7 @@ route.post('/', async (req, res, next) => {
 
 ## DI(Dependency Injection) 💉
 
-## Unit Test는 선택이 아닌 필수 🕵️‍♂️
+## 단위 테스트트는 선택이 아닌 필수 🕵️‍♂️
 
 ## Cron 작업과 반복적인 작업 ⏰
 
