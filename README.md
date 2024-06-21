@@ -75,37 +75,78 @@ Express.js Controller에 비즈니스 로직을 포함하는 것은 편리할 �
 
 ```javascript
 route.post('/', async (req, res, next) => {
+    const requestDTO = req.body;
 
-  const userRequestDTO = req.body;
-  const isUserValid = validators.user(userRequestDTO)
-  if(!isUserValid) {
-    return res.status(400).end();
-  }
-
-  // 수 많은 비즈니스 로직을 포함함.
-  const userRecord = await UserModel.create(userDTO);
-  delete userRecord.password;
-  delete userRecord.salt;
-  const companyRecord = await CompanyModel.create(userRecord);
-  const companyDashboard = await CompanyDashboard.create(userRecord, companyRecord);
-
-  ...whatever...
-
-
-  // 이 부분이 최적화라면 모든 것을 엉망으로 만듬.
-  // 클라이언트에게 응답을 보냄.
-  res.json({ user: userRecord, company: companyRecord });
-
-  // 계속 진행되는 코드
-  const salaryRecord = await SalaryModel.create(userRecord, companyRecord);
-  eventTracker.track('user_signup',userRecord,companyRecord,salaryRecord);
-  intercom.createUser(userRecord);
-  gaAnalytics.event('user_signup',userRecord);
-  await EmailService.startSignupSequence(userRecord)
+    //비즈니스 로직 - 인증 관련 (대략 300줄)
+    //비즈니스 로직 - 가입 관련 (대략 100줄)
+    //기타 작업 - 메일 보내기 (대략 10줄)
+      .
+      .
+      .
+    //responseDTO 획득
+    res.json(responseDTO)
 });
 ```
 
-## 비즈니스 로직은 Service Layer에 넣자 💼
+여러 기능들이 분리 되어있지 않고, 한 곳에 군집해서 존재한다면 여러 문제가 생길 수 있다.
+
+1. 가독성 문제
+2. Unit 단위로의 테스트를 필요로 할 때 의존성이 과하게 들어감.
+
+### 비즈니스 로직은 Service Layer에 넣자 💼
+
+서비스 계층에 비즈니스 로직을 위치시킴으로써, 다음과 같은 이점을 얻을 수 있다.
+
+-   **단위 테스트 용이성**
+
+    서비스 계층에 비즈니스 로직을 집중시킴으로써, 각 비즈니스 기능을 최소 단위로 테스트할 수 있다. 이는 각 서비스 메서드를 독립적으로 테스트하고 검증할 수 있는 기회를 제공한다.
+
+-   **코드의 모듈화와 재사용성**
+
+    서비스 계층에 비즈니스 로직을 구현하면, 이를 여러 컨트롤러나 다른 서비스에서 쉽게 재사용할 수 있다. 이는 코드의 중복을 줄이고 유지보수성을 향상시킨다.
+
+-   **SQL과의 분리**
+
+    서비스 계층에서는 SQL 쿼리와 같은 데이터베이스 접근 관련 로직을 직접 다루지 않아야 한다. 이는 서비스 계층이 비즈니스 로직에 집중할 수 있도록 하며, DAO(Data Access Object)를 이용하여 데이터베이스와의 상호작용을 추상화하는 것이 좋다.
+
+-   **트랜잭션 관리**
+
+    여러 데이터베이스 작업을 하나의 비즈니스 트랜잭션으로 묶는 등의 트랜잭션 관리도 서비스 계층에서 처리할 수 있다. 이는 데이터 일관성을 유지하고 예외 상황을 처리하는 데 유리하다.
+
+-   **서비스의 응집도 높이기**
+
+    서비스 계층은 비즈니스 요구사항에 집중하여 구현되므로, 시스템의 각 계층이 명확히 분리되고 각 계층이 자신의 역할에 집중할 수 있도록 도와준다.
+
+따라서 서비스 계층에 비즈니스 로직을 중심으로 설계함으로써 코드의 품질을 향상시키고 유지보수성을 개선할 수 있다. 아래의 예시를 참조하자.
+
+```cjs
+/** Controller **/
+route.post('/', authMiddleware, async (req, res, next) => {
+    try {
+        const requestDTO = req.body
+
+        const responseDTO = await authService.join(requestDTO)
+        await mailService.sendWelcomeMail()
+
+        res.json(responseDTO)
+    } catch (err) {
+        next(err)
+    }
+})
+
+
+/** Service (authService만 간단하게 예시) **/
+module.exports = class AuthService{
+          .
+          .
+          .
+  async join(user){
+    //join 동작 진행
+  }
+}
+```
+
+위의 코드에서 Service와 middleware를 통해서 Controller 자체의 구문이 훨씬 간결해진 것을 알 수 있다.
 
 ## Pub/Sub Layer도 사용하자 🎙️
 
