@@ -8,4 +8,6 @@ const route = Router()
  */
 module.exports = (app, authController) => {
     app.use('/auth', route)
+    route.post('/join', authController.join)
+    route.post('/login', authController.login)
 }

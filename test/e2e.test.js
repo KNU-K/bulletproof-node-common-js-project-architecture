@@ -7,14 +7,14 @@ describe('e2e 간단하게 테스트', () => {
         app = await createApp()
         if (!app) Logger.error('failed loading app')
     })
-    it('/api/user/join', async () => {
-        const res = await request(app).post('/api/user/join')
+    it('/api/auth/join', async () => {
+        const res = await request(app).post('/api/auth/join')
         expect(res.statusCode).toEqual(200)
         expect(res).toHaveProperty('text')
         expect(res.text).toEqual('join')
     })
-    it('/api/user/login', async () => {
-        const res = await request(app).post('/api/user/login')
+    it('/api/auth/login', async () => {
+        const res = await request(app).post('/api/auth/login')
         expect(res).toHaveProperty('text')
         expect(res.text).toEqual('login')
     })

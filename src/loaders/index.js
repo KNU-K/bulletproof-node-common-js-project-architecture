@@ -1,5 +1,9 @@
 const expressLoader = require('./express')
+const mongooseLoader = require('./mongoose')
+const UserModel = require('../models/user')
 const { Logger } = require('./logger')
+const dependencyInjector = require('./dependency-injector')
+
 /**
  * loaders 기능을 초기화합니다.
  *
@@ -10,6 +14,20 @@ const { Logger } = require('./logger')
  *   이 함수는 비동기적으로 작업을 수행하며, 반환 값이 없습니다.
  */
 async function init({ expressApp }) {
+    const mongoConnection = await mongooseLoader()
+    Logger.info('DB loaded and connected')
+
+    /**DI 에 넣어주는거 포함 */
+
+    await dependencyInjector(mongoConnection, [
+        {
+            name: 'userModel',
+            model: UserModel,
+        },
+    ])
+    Logger.info('dependencyInjector successfully loaded')
+
+    //models.forEach(({ name, model }) => Container.set(name, model))
     await expressLoader({ app: expressApp })
     Logger.info('express successfully loaded')
 }
