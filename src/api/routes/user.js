@@ -8,6 +8,4 @@ const route = Router()
  */
 module.exports = (app, userController) => {
     app.use('/user', route)
-    route.post('/join', userController.join)
-    route.post('/login', userController.login)
 }

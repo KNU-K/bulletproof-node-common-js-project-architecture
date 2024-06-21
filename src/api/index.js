@@ -1,12 +1,14 @@
 const { Router } = require('express')
 const user = require('./routes/user')
 const auth = require('./routes/auth')
-const UserController = require('./controllers/user')
-const AuthController = require('./controllers/auth')
+
+const { default: Container } = require('typedi')
 
 module.exports = () => {
     const app = Router()
-    user(app, new UserController())
-    auth(app, new AuthController())
+    const userController = Container.get('userController')
+    const authController = Container.get('authController')
+    user(app, userController)
+    auth(app, authController)
     return app
 }
