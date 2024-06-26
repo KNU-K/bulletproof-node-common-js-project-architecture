@@ -24,10 +24,10 @@ jobs:
               run: |
                   git config --global user.email "kang4030@knu.ac.kr"
                   git config --global user.name "KNU-K"
-                  git fetch --prune  # Fetch all changes and prune stale branches
-                  git checkout main  # Switch to the main branch
-                  git pull origin main  # Ensure we have the latest main branch
-                  git merge --no-ff "$GITHUB_SHA" --no-edit  # Merge changes from ing branch
-                  git push origin main  # Push merged changes to main branch
+                  git fetch --prune 
+                  git checkout main 
+                  git pull origin main 
+                  git merge --no-ff "$GITHUB_SHA" --no-edit  
+                  git push origin main
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
