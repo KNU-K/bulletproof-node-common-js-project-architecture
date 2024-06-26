@@ -2,14 +2,15 @@
 
 const AuthService = require('../../src/services/auth')
 const UserModel = require('../../src/models/user')
-
+const UserPublisher = require('../../src/publishers/user')
 // jest.mock을 사용하여 UserModel과 UserPublisher를 모킹합니다.
 jest.mock('../../src/models/user')
-
+jest.mock('../../src/publishers/user')
 describe('AuthService', () => {
     beforeEach(() => {
         // UserModel의 mockClear를 호출하여 이전 호출 기록을 지웁니다.
         UserModel.mockClear()
+        UserPublisher.mockClear()
     })
 
     // 테스트 케이스: join 메소드를 테스트합니다.
@@ -17,24 +18,26 @@ describe('AuthService', () => {
         const mockUserModelInstance = {
             save: jest.fn().mockResolvedValue(),
         }
-
+        const mockUserPublishModelInstance = {
+            publish: jest.fn().mockResolvedValue(),
+        }
         // UserModel의 생성자를 모킹하여 인스턴스를 반환하도록 설정합니다.
         UserModel.mockImplementation(() => mockUserModelInstance)
-
-        const authService = new AuthService(UserModel, null)
+        UserPublisher.mockImplementation(() => mockUserPublishModelInstance)
+        const authService = new AuthService(UserModel, new UserPublisher())
 
         const user = {
             username: 'testuser',
             email: 'testuser@example.com',
             password: 'password',
         }
-
+        //console.log(mockUserPublishModelInstance.publish(1, 2))
         await expect(authService.join(user)).resolves.toEqual(['user', 'token'])
 
-        // UserModel의 생성자가 올바르게 호출되었는지 확인합니다.
+        // // UserModel의 생성자가 올바르게 호출되었는지 확인합니다.
         expect(UserModel).toHaveBeenCalledWith(user)
 
-        // save 메소드가 호출되었는지 확인합니다.
+        // // save 메소드가 호출되었는지 확인합니다.
         expect(mockUserModelInstance.save).toHaveBeenCalled()
     })
 
@@ -45,10 +48,13 @@ describe('AuthService', () => {
             password: 'password',
             findOne: jest.fn().mockResolvedValue({ password: 'password' }),
         }
-
+        const mockUserPublishModelInstance = {
+            publish: jest.fn().mockResolvedValue(),
+        }
         UserModel.findOne.mockImplementation(() => mockUserInstance)
+        UserPublisher.mockImplementation(() => mockUserPublishModelInstance)
 
-        const authService = new AuthService(UserModel, null)
+        const authService = new AuthService(UserModel, new UserPublisher())
 
         const credentials = {
             email: 'testuser@example.com',
