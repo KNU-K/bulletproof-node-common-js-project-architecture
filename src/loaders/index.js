@@ -19,7 +19,7 @@ async function init({ expressApp }) {
 
     /**DI 에 넣어주는거 포함 */
 
-    await dependencyInjector(mongoConnection, [
+    await dependencyInjector([
         {
             name: 'userModel',
             model: UserModel,
