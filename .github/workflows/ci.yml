@@ -6,7 +6,7 @@ on:
             - '*'
 
 jobs:
-    graphql-rest-api-test:
+    bulletproof-api-test:
         runs-on: ubuntu-latest
 
         steps:
@@ -15,5 +15,5 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Run tests
-              run: npm test
+            - name: Run unit tests
+              run: npm test unit
