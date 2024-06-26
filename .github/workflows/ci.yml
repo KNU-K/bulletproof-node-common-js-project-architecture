@@ -17,3 +17,11 @@ jobs:
 
             - name: Run unit tests
               run: npm test unit
+
+            - name: Merge to main
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: |
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git merge --no-ff $GITHUB_SHA
+                  git push origin main
