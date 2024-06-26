@@ -1,0 +1,27 @@
+name: Node.js CI
+
+on:
+    push:
+        branches:
+            - '*'
+
+jobs:
+    bulletproof-api-test-2:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Run unit tests
+              run: npm test unit
+
+            - name: Merge to main
+              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              run: |
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git merge --no-ff $GITHUB_SHA
+                  git push origin main
