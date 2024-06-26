@@ -19,7 +19,7 @@ jobs:
               run: npm test unit
 
             - name: Merge to main
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              if: github.event_name == 'push' && github.ref == 'refs/heads/ing'
               run: |
                   git config --global user.email "kang4030@knu.ac.kr"
                   git config --global user.name "KNU-K"
