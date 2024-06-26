@@ -148,11 +148,95 @@ module.exports = class AuthService{
 
 위의 코드에서 Service와 middleware를 통해서 Controller 자체의 구문이 훨씬 간결해진 것을 알 수 있다.
 
-## Pub/Sub Layer도 사용하자 🎙️
-
 ## DI(Dependency Injection) 💉
 
-## 단위 테스트트는 선택이 아닌 필수 🕵️‍♂️
+DI 또는 Ioc 클래스나 함수의 종속성을 생성자를 통해 주입 또는 전달하여 코드의 구성에 도움이 되는 일반적인 패턴이다.
+
+이렇게하면 단위 테스트를 작성할 때 해당 테스트를 당하는 객체가 다른 Context 에서 사용될 때, `호환이 가능한 종속성`을 주입하여 보다 쉽게 동작에 대한 테스트를 진행할 수 있다.
+
+-   DI가 없는 코드
+
+    ```cjs
+    const UserModel = require('../models/user')
+    class UserService {
+        constructor() {}
+        join() {
+            //UserModel을 직접적으로 사용
+        }
+    }
+    ```
+
+    이 형태는 만약 테스트를 하게 된다면, UserModel을 무조건적으로 의존할 수 밖에 없는 형태가 된다.
+
+-   수동 종속성 주입을 사용하는 코드
+
+    ```cjs
+    const UserModel = require('../models/user')
+    class UserService {
+        /**
+         * @param {UserModel} userModel
+         **/
+        constructor(userModel) {
+            this.userModel = userModel
+        }
+        join(user) {
+            //this.userModel 을 사용하여 비즈니스 로직 구성
+            const newUser = new this.userModel(user)
+            newUser.save()
+        }
+    }
+    ```
+
+    이러한 형태로 구성하게 되면, userModel 이 생성자에 주입되기 때문에, 테스트할 때 `호환 가능한 객체`를 주입하기만하면, 비즈니스 로직이 정상적으로 동작하는지 알 수 있다.
+
+    아래는 테스트에 대한 예시이다.
+
+    ```cjs
+    const UserModel = require("./models/user)
+    describe("UserService Test",()=>{
+        beforeEach(()=>{
+            UserModel.mockClear()
+        })
+        it("join function test",async()=>{
+            const mockUserModelInstance = {
+                save:jest.fn().mockResolvedValue();
+            }
+          UserModel.mockImplementation(() => mockUserModelInstance)
+
+          const userService = new UserService(UserModel);
+          //userService.save() 동작을 확인하여 테스트를 할 수 있다.
+        })
+
+    })
+    ```
+
+    위와 같은 형태로 테스트를 진행하게 되면 UserModel에 영향을 받지않고, 오로지 userService만을 테스트할 수 있게 된다.
+
+    `typedi`라는 라이브러리를 활용하면, Container를 통해서 보다 쉽게 의존성을 주입 할 수 있다.
+
+    > this가 undefined가 되는 문제를 주의해야한다. (bind 로직이나, arrow 함수를 사용하여 this 를 명시적으로 보여줘야한다.)
+
+## 단위 테스트는 선택이 아닌 필수 🕵️‍♂️
+
+단위 테스트라는 것은 윗부분에서도 설명했지만, 굉장히 중요한 부분이라고 생각이 된다. 이 부분은 아직까지도 논쟁이 많은 부분이지만, unit 에 대한 부분이 정확히 동작하는 간단하고 빠른 방법이 테스트 작성이라는 것은 알고 있으면 좋을 것 같다.
+
+> 현재 정리에서는 mock 라이브러리를 사용하고 있지만, mock을 라이브러리를 통해 구현하는 것은 절대적인 필수 요소가 아니다.
+
+이는 해당 레파지토리의 test 폴더를 참조하여 학습하면 좋을 것 같다.
+
+## Pub/Sub Layer도 사용하자 🎙️
+
+일반적으로 3-Layered-Architecture 만을 고수할 수 있지만, 그 방법은 좋지않은 방법이다.
+
+간단한 서비스 호출 로직이 있디고 가정하자. 해당 로직이 1~2개일 때는 문제가 되지는 않지만, 추후 서비스가 확장 됨에 따라서 해당 서비스 객체는 1000줄이 넘는 그런 코드가 만들어진다.
+
+이는 SOLID 원칙에서 `SRP (단일 책임의 원칙)`에 위배된다.
+
+그렇기 때문에 코드를 유지하면서, 관리할 수 있도록 해당 서비스 호출에 대한 부분을 분리 해주면 좋다.
+
+event 에 대한 handler 와 listener , publishers 와 subscribes 또는 provider와 consumer 등의 관계로 이를 표현 할 수 있다.
+
+이제 아래의 간단한 예제 의사코드를 보자.
 
 ## Cron 작업과 반복적인 작업 ⏰
 
