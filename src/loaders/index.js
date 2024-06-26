@@ -28,7 +28,7 @@ async function init({ expressApp }) {
     Logger.info('dependencyInjector successfully loaded')
 
     //models.forEach(({ name, model }) => Container.set(name, model))
-    await expressLoader({ app: expressApp })
+    await expressLoader({ app: expressApp, queue: queue })
     Logger.info('express successfully loaded')
 }
 module.exports = {

@@ -1,4 +1,7 @@
 const express = require('express')
+const { ExpressAdapter } = require('@bull-board/express')
+const { createBullBoard } = require('@bull-board/api')
+const { BullAdapter } = require('@bull-board/api/bullAdapter')
 const routes = require('../api')
 /**
  * 주어진 Express 애플리케이션을 이용하여 특정 작업을 수행하는 함수입니다.
@@ -12,9 +15,16 @@ const routes = require('../api')
  * @returns {Promise<void>} - 함수가 완료될 때 해결되는 프로미스입니다.
  *   이 함수는 비동기적으로 작업을 수행하며, 반환 값이 없습니다.
  */
-module.exports = async ({ app }) => {
+module.exports = async ({ app, queue }) => {
     // 구현 내용은 여기에 작성합니다
+    const serverAdapter = new ExpressAdapter()
+    serverAdapter.setBasePath('/admin/queues')
     app.use(express.json())
     app.use(express.urlencoded({ extended: false }))
     app.use('/api', routes())
+    createBullBoard({
+        queues: [new BullAdapter(queue)],
+        serverAdapter: serverAdapter,
+    })
+    app.use('/admin/queues', serverAdapter.getRouter())
 }
