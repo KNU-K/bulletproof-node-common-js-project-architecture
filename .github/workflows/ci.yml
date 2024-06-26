@@ -10,7 +10,8 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
             - name: Install dependencies
               run: npm install
@@ -19,9 +20,14 @@ jobs:
               run: npm test unit
 
             - name: Merge to main
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+              if: github.event_name == 'push' && github.ref == 'refs/heads/ing'
               run: |
-                  git config --global user.email "actions@github.com"
-                  git config --global user.name "GitHub Actions"
-                  git merge --no-ff $GITHUB_SHA
+                  git config --global user.email "kang4030@knu.ac.kr"
+                  git config --global user.name "KNU-K"
+                  git fetch --prune 
+                  git checkout main 
+                  git pull origin main 
+                  git merge --allow-unrelated-histories --no-ff "$GITHUB_SHA" --no-edit  
                   git push origin main
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
