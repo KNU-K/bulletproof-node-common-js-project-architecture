@@ -3,7 +3,9 @@ class UserPublisher {
         this.queue = queue
     }
 
-    async publish(event, data) {
+    publish = async (event, data) => {
+        console.log(data)
+        console.log('queue')
         await this.queue.add(event, data)
         console.log(`Dispatched ${event} task`)
     }
