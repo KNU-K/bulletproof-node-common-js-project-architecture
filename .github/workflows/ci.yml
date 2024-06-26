@@ -10,24 +10,24 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+            - name: Checkout repository
+              uses: actions/checkout@v2
 
-      - name: Install dependencies
-        run: npm install
+            - name: Install dependencies
+              run: npm install
 
-      - name: Run unit tests
-        run: npm test unit
+            - name: Run unit tests
+              run: npm test unit
 
-      - name: Merge to main
-        if: github.event_name == 'push' && github.ref == 'refs/heads/ing'
-        run: |
-          git config --global user.email "kang4030@knu.ac.kr"
-          git config --global user.name "KNU-K"
-          git fetch --prune  # Fetch all changes and prune stale branches
-          git checkout main  # Switch to the main branch
-          git pull origin main  # Ensure we have the latest main branch
-          git merge --no-ff "$GITHUB_SHA" --no-edit  # Merge changes from ing branch
-          git push origin main  # Push merged changes to main branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Merge to main
+              if: github.event_name == 'push' && github.ref == 'refs/heads/ing'
+              run: |
+                  git config --global user.email "kang4030@knu.ac.kr"
+                  git config --global user.name "KNU-K"
+                  git fetch --prune  # Fetch all changes and prune stale branches
+                  git checkout main  # Switch to the main branch
+                  git pull origin main  # Ensure we have the latest main branch
+                  git merge --no-ff "$GITHUB_SHA" --no-edit  # Merge changes from ing branch
+                  git push origin main  # Push merged changes to main branch
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
