@@ -27,7 +27,7 @@ jobs:
                   git fetch --prune 
                   git checkout main 
                   git pull origin main 
-                  git merge --no-ff "$GITHUB_SHA" --no-edit  
+                  git merge --allow-unrelated-histories --no-ff "$GITHUB_SHA" --no-edit  
                   git push origin main
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
