@@ -23,7 +23,8 @@ jobs:
               run: |
                   git config --global user.email "kang4030@knu.ac.kr"
                   git config --global user.name "KNU-K"
+                  git pull origin main  # 최신 변경 사항을 가져옵니다.
                   git merge --no-ff $GITHUB_SHA
                   git push origin main
               env:
-                  SUPER_TOKEN: ${{secret.SUPER_TOKEN}}
+                  SUPER_TOKEN: ${{ secrets.SUPER_TOKEN }}
