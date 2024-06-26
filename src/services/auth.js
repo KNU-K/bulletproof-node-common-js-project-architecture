@@ -5,18 +5,17 @@ class AuthService {
     /**
      *
      * @param {userModel} userModel
-     * @param {UserPublisher} UserPublisher
+     * @param {UserPublisher} userPublisher
      */
-    constructor(userModel, UserPublisher) {
+    constructor(userModel, userPublisher) {
         this.userModel = userModel
-        this.UserPublisher = UserPublisher
+        this.userPublisher = userPublisher
     }
     join = async (user) => {
         try {
             const newUser = new this.userModel(user)
             await newUser.save()
-
-            //this.UserPublisher.publish('OnUserJoin')
+            await this.userPublisher.publish('onUserJoin', { email: user.email })
 
             //해당 토큰 자리에 실제 jwt 로 token을 만들어서 넣으면 됩니다.
             return ['user', 'token']
@@ -27,9 +26,10 @@ class AuthService {
     }
     login = async ({ email, password }) => {
         try {
-            // this.UserPublisher.publish('OnUserJoin')
+            //   this.UserPublisher.publish('onUserJoin')
             const foundUser = await this.userModel.findOne({ email: email })
             if (foundUser.password !== password) throw new Error('로그인에 실패하였습니다.')
+            await this.userPublisher.publish('onUserLogin', { email: email })
 
             //해당 토큰 자리에 실제 jwt 로 token을 만들어서 넣으면 됩니다.
             return ['user', 'token']
