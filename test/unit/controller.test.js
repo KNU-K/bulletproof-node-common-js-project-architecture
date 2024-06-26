@@ -1,4 +1,4 @@
-const AuthController = require('../src/api/controllers/auth')
+const AuthController = require('../../src/api/controllers/auth')
 
 describe('AuthController unit test', () => {
     let authController
