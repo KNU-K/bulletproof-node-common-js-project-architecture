@@ -6,7 +6,7 @@ on:
             - '*'
 
 jobs:
-    bulletproof-api-test:
+    bulletproof-api-test-2:
         runs-on: ubuntu-latest
 
         steps:
