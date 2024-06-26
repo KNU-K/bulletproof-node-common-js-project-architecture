@@ -1,24 +1,16 @@
-// UserSubscriber.js
-
-const { userQueue } = require('./dispatcher')
-
-// subscriber.js
-
 class UserSubscriber {
-    constructor(queue, emailService) {
+    constructor(queue) {
         this.queue = queue
-        this.emailService = emailService
         this.initialize()
     }
 
-    async processJob(job) {
-        const { event, data } = job.data
-
-        switch (event) {
-            case 'onLogin':
+    processJob = async (job) => {
+        const { name, data } = job
+        switch (name) {
+            case 'onUserLogin':
                 await this.handleLogin(data)
                 break
-            case 'onJoin':
+            case 'onUserJoin':
                 await this.handleJoin(data)
                 break
             default:
@@ -27,17 +19,14 @@ class UserSubscriber {
     }
 
     async handleLogin({ email }) {
-        console.log(`Handling login for: ${email}`)
-        // 여기서 최근 로그인 상태를 기록하는 로직을 추가합니다.
+        try {
+            console.log(`Handling login for: ${email}`)
+            // 최근 로그인 상태 기록 로직 추가
+        } catch (err) {}
     }
 
-    async handleJoin({ email, name }) {
+    async handleJoin({ email }) {
         try {
-            await this.emailService.sendEmail(
-                email,
-                'Welcome!',
-                `Hello ${name}, welcome to our service!`,
-            )
             console.log(`Sent welcome email to: ${email}`)
         } catch (error) {
             console.error(`Failed to send welcome email to: ${email}`, error)
@@ -45,10 +34,13 @@ class UserSubscriber {
     }
 
     initialize() {
-        this.queue.process(this.processJob.bind(this))
+        this.queue.process('onUserLogin', this.processJob.bind(this))
+        this.queue.process('onUserJoin', this.processJob.bind(this))
+
         this.queue.on('completed', (job) => {
             console.log(`Completed job: ${job.id}`)
         })
+
         this.queue.on('failed', (job, err) => {
             console.log(`Failed job: ${job.id} with error ${err.message}`)
         })

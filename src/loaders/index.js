@@ -3,7 +3,7 @@ const mongooseLoader = require('./mongoose')
 const UserModel = require('../models/user')
 const { Logger } = require('./logger')
 const dependencyInjector = require('./dependency-injector')
-
+const bullLoader = require('./bull')
 /**
  * loaders 기능을 초기화합니다.
  *
@@ -17,9 +17,9 @@ async function init({ expressApp }) {
     const mongoConnection = await mongooseLoader()
     Logger.info('DB loaded and connected')
 
+    const queue = await bullLoader()
     /**DI 에 넣어주는거 포함 */
-
-    await dependencyInjector([
+    await dependencyInjector(queue, [
         {
             name: 'userModel',
             model: UserModel,
