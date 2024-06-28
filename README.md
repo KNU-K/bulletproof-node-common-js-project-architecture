@@ -3,20 +3,20 @@
 > Santiage Quinteros 의 "Bulletproof node.js project architecture" 를 기반하여 한글버전으로 doc를 작성한다.
 
 ## 목차
+1. **서론**
+2. **폴더 구조 🏢**
+    - **일반적인 형태의 구조**
+    - **폴더 설명**
+3. **3 Layer Architecture 🥪**
+    - **비즈니스 로직을 Controllers에 넣지 말자**
+    - **비즈니스 로직은 Service Layer에 넣자 💼**
+4. **DI(Dependency Injection) 💉**
+5. **단위 테스트는 선택이 아닌 필수 🕵️‍♂️**
+6. **Pub/Sub Layer도 사용하자 🎙️**
+7. **Cron 작업과 반복적인 작업 ⏰**
+8. **설정과 Secrets ⚙️**
+9. **로더 🏗️**
 
-1. [서론](#서론)
-2. [폴더 구조 🏢](#폴더-구조-🏢)
-    - [일반적인 형태의 구조](#일반적인-형태의-구조)
-    - [폴더 설명](#폴더-설명)
-3. [3 Layer Architecture 🥪](#3-layer-architecture-🥪)
-    - [비즈니스 로직을 Controllers에 넣지 말자](#비즈니스-로직을-controllers에-넣지-말자)
-    - [비즈니스 로직은 Service Layer에 넣자 💼](#비즈니스-로직은-service-layer에-넣자-💼)
-4. [DI(Dependency Injection) 💉](#di-dependency-injection-💉)
-5. [단위 테스트는 선택이 아닌 필수 🕵️‍♂️](#단위-테스트는-선택이-아닌-필수-🕵️‍♂️)
-6. [Pub/Sub Layer도 사용하자 🎙️](#pubsub-layer도-사용하자-🎙️)
-7. [Cron 작업과 반복적인 작업 ⏰](#cron-작업과-반복적인-작업-⏰)
-8. [설정과 Secrets ⚙️](#설정과-secrets-⚙️)
-9. [로더 🏗️](#로더-🏗️)
 
 ## 서론
 
