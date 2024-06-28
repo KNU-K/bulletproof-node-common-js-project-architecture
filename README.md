@@ -238,6 +238,76 @@ event 에 대한 handler 와 listener , publishers 와 subscribes 또는 provide
 
 이제 아래의 간단한 예제 의사코드를 보자.
 
+```cjs
+//Publisher
+class Publisher {
+    constructor(queue) {
+        this.queue = queue
+    }
+    publish = async (events, act) => {
+        queue.add(events, act)
+        //event 를 등록할 수 있다.
+    }
+}
+```
+
+```cjs
+//Subscriber
+class UserSubscriber {
+    constructor(queue) {
+        this.queue = queue
+        this.initialize()
+    }
+
+    processJob = async (job) => {
+        const { name, data } = job
+        try {
+            switch (name) {
+                case 'event1':
+                    await this.handleEvent1(data)
+                    break
+                case 'event2':
+                    await this.handleEvent2(data)
+                    break
+                default:
+                    console.error(`Unknown event: ${name}`)
+            }
+        } catch (error) {
+            console.error(`Failed to process job ${job.id}:`, error)
+        }
+    }
+
+    async handleEvent1(data) {
+        console.log(`${data}`)
+        // 해당 이벤트에 필요한 작업을 상세하게 표기할 수 있습니다.
+    }
+
+    async handleEvent2(data) {
+        console.log(`${data}`)
+        // 해당 이벤트에 필요한 작업을 상세하게 표기할 수 있습니다.
+    }
+
+    initialize() {
+        const events = ['event1', 'event2']
+        events.forEach((event) => {
+            this.queue.process(event, this.processJob)
+        })
+
+        this.queue.on('completed', (job) => {
+            console.log(`Completed job: ${job.id}`)
+        })
+
+        this.queue.on('failed', (job, err) => {
+            console.log(`Failed job: ${job.id} with error: ${err.message}`)
+        })
+    }
+}
+```
+
+이는 간단한 `pub/sub 패턴`의 예시이다. 해당 구조는 무조건적인 요소는 아니다. 필요에 따라 구조의 변경을 할 수도 있다. 하지만, 이를 사용하는 이유는 추후 서비스 로직의 가독성 문제로 이어지는 것을 방지하기 위함이다.
+
+end-point 에서 publish 를 통해서 `어떤 작업`을 발행하면, subscriber 가 이를 `processing`하는 과정을 거친다.
+
 ## Cron 작업과 반복적인 작업 ⏰
 
 ## 설정과 Secrets ⚙️
