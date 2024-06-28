@@ -8,4 +8,5 @@ const route = Router()
  */
 module.exports = (app, userController) => {
     app.use('/user', route)
+    /**마이페이지에 대한 API 추가 */
 }
