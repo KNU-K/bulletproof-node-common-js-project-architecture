@@ -5,11 +5,18 @@
 ## 목차
 
 1. [서론](#서론)
-2. [폴더 구조](#폴더-구조-🏢)
+2. [폴더 구조 🏢](#폴더-구조-🏢)
     - [일반적인 형태의 구조](#일반적인-형태의-구조)
     - [폴더 설명](#폴더-설명)
-3. [3 Layer Architecture](#3-layer-architecture-🥪)
-    - [비즈니스 로직을 Controllers에 넣지 말자](#비즈니스-로직을-Controllers에-넣지-말자)
+3. [3 Layer Architecture 🥪](#3-layer-architecture-🥪)
+    - [비즈니스 로직을 Controllers에 넣지 말자](#비즈니스-로직을-controllers에-넣지-말자)
+    - [비즈니스 로직은 Service Layer에 넣자 💼](#비즈니스-로직은-service-layer에-넣자-💼)
+4. [DI(Dependency Injection) 💉](#di-dependency-injection-💉)
+5. [단위 테스트는 선택이 아닌 필수 🕵️‍♂️](#단위-테스트는-선택이-아닌-필수-🕵️‍♂️)
+6. [Pub/Sub Layer도 사용하자 🎙️](#pubsub-layer도-사용하자-🎙️)
+7. [Cron 작업과 반복적인 작업 ⏰](#cron-작업과-반복적인-작업-⏰)
+8. [설정과 Secrets ⚙️](#설정과-secrets-⚙️)
+9. [로더 🏗️](#로더-🏗️)
 
 ## 서론
 
@@ -310,6 +317,122 @@ end-point 에서 publish 를 통해서 `어떤 작업`을 발행하면, subscrib
 
 ## Cron 작업과 반복적인 작업 ⏰
 
+기존 저자는 `agenda.js`를 통해서 스케줄링과 배치 프로세싱에 대한 작업을 진행했지만, 본 필자는 이를 `bull`을 통해서 변경하였다.
+
+`bull`을 사용하게 되면, Mongo-DB와 함께하는 agenda보다는 영구적인 저장이 힘들 수도 있지만, 이는 다른 솔루션으로 극복할 수 있다.
+
+`bull`은 redis기반으로 굉장히 강한 메시큐의 작업을 지원해준다. 이를 통해서 반복적인 작업이나 pub/sub 구조에 대해서 좋은 솔루션을 제작할 수 있을 것이다.
+
+> ### Bull vs Agenda 성능 비교 분석
+>
+> | 특성                       | Bull                                     | Agenda                                         |
+> | -------------------------- | ---------------------------------------- | ---------------------------------------------- |
+> | **사용 목적**              | 작업 큐, 반복 작업, 백그라운드 작업 처리 | 반복 작업, 일정 관리, 작업 큐 처리             |
+> | **기반 기술**              | Redis                                    | MongoDB                                        |
+> | **설치 용이성**            | 쉽고 간단 (`npm install bull`)           | 상대적으로 간단 (`npm install agenda`)         |
+> | **반복 작업 지원**         | 지원 (Cron 표현식 및 반복 간격 설정)     | 지원 (Cron 표현식 및 반복 간격 설정)           |
+> | **작업 우선순위 설정**     | 지원                                     | 지원                                           |
+> | **작업 지연**              | 지원                                     | 지원                                           |
+> | **성능 및 확장성**         | 매우 뛰어남, 고성능, 수평 확장 가능      | 상대적으로 높음, 수평 확장 가능                |
+> | **작업 재시도**            | 지원                                     | 지원                                           |
+> | **작업 실패 처리 및 알림** | 지원 (이벤트 리스너 사용)                | 지원 (이벤트 리스너 사용)                      |
+> | **상태 모니터링**          | 지원 (대시보드 및 이벤트)                | 지원 (대시보드 및 이벤트)                      |
+> | **보안**                   | Redis 보안 설정 필요                     | MongoDB 보안 설정 필요                         |
+> | **커뮤니티 및 문서화**     | 활발한 커뮤니티, 풍부한 문서             | 활발한 커뮤니티, 풍부한 문서                   |
+> | **의존성 관리**            | Redis 설치 필요                          | MongoDB 설치 필요                              |
+> | **추가 기능**              | 작업 제한, 작업 프로세스 병렬 처리       | 작업 잠금, 작업 완료 후 데이터 보존            |
+> | **장점**                   | 빠른 처리 속도, 높은 확장성              | 유연한 작업 관리, MongoDB와의 자연스러운 통합  |
+> | **단점**                   | Redis 필요, 초과 부하 시 성능 저하 가능  | MongoDB 필요, 성능이 Redis에 비해 낮을 수 있음 |
+>
+> #### 결론
+>
+> -   **Bull**: 고성능, 확장성, 빠른 처리 속도를 요구하는 시스템에 적합하다. Redis를 기반으로 하여 대규모 분산 시스템에 유리하다.
+> -   **Agenda**: 유연한 작업 관리와 MongoDB 통합이 필요한 경우 적합하다. 상대적으로 사용이 간단하며 다양한 반복 작업 및 일정 관리 기능을 제공한다.
+>
+> 각 라이브러리는 특정 용도와 요구 사항에 따라 장단점이 있다. 프로젝트의 특성과 요구에 맞는 라이브러리를 선택하는 것이 중요하다.
+
 ## 설정과 Secrets ⚙️
 
+해당 내용은 API 키와 데이터베이스 문자열 연결을 저장하는 가장 좋은 접근 방식인 node.js용 Twelve-Factor App 의 전투 테스트된 개념에 따라 dotenv를 사용하는 것이다.
+
+.env커밋되어서는 안 되는 파일 (하지만 저장소에 기본값이 있어야 함)을 넣은 다음, npm 패키지가 dotenv.env 파일을 로드하고 해당 변수를 node.js 객체의 process.env 에 삽입한다,
+
+그것으로 충분할 수 있지만 추가 단계를 추가 해보자. npm 패키지가 .env 파일을 로드하는 [`config/index.js`](./src/config//index.js)파일이 있고 dotenv객체를 사용하여 변수를 저장하므로 구조와 코드 자동 완성이 가능해진다.
+
 ## 로더 🏗️
+
+아이디어는 node.js 서비스의 시작 프로세스를 테스트 가능한 모듈로 분할한다는 것이다.
+
+```cjs
+const mongoose = require('mongoose');
+const express = require('express');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const cors = require('cors');
+const errorhandler = require('errorhandler');
+const app = express();
+
+app.get('/status', (req, res) => { res.status(200).end(); });
+app.head('/status', (req, res) => { res.status(200).end(); });
+app.use(cors());
+app.use(require('morgan')('dev'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json(setupForStripeWebhooks));
+app.use(require('method-override')());
+app.use(express.static(__dirname + '/public'));
+app.use(session({ secret: process.env.SECRET, cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+mongoose.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+
+require('./config/passport');
+require('./models/user');
+require('./models/company');
+app.use(require('./routes'));
+app.use((req, res, next) => {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+app.use((err, req, res) => {
+  res.status(err.status || 500);
+  res.json({'errors': {
+    message: err.message,
+    error: {}
+  }});
+});
+
+
+... more stuff
+
+... maybe start up Redis
+
+... maybe add more middlewares
+
+async function startServer() {
+  app.listen(process.env.PORT, err => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    console.log(`Your server is ready !`);
+  });
+}
+
+// Run the async function to start our server
+startServer();
+```
+
+해당 내용은 일반적으로 많이 사용하는 형식이다. 기본적인 구성을 `app.js`에 무작정 다 넣는 방식이고 이는, app.js 내에서의 가독성을 매우 떨어트린다. 그렇기 때문에 해당 내용을 loader를 통해서 시작 프로세스를 단위로 나누고, 이를 통해서 app을 구성하는 방식으로 `테스트`와 `구조화`에 용이하게 구성할 수 있다.
+
+-   [`./src/server.js`](./src/server.js) - 서버 모듈
+
+-   [`./src/app.js`](./src/app.js) - express app 모듈
+
+-   [`./src/loaders`](./src/loaders/) - 시작 프로세스의 모듈 집합
+
+해당 부분을 참고하면 이를 좀 더 확실하게 이해할 수 있을 것이다.
+
+기존의 bulletproof 구조는 `app`과 `server`를 분해하지 않는다. 하지만, 이는 e2e 테스트를 할 때, app 만 테스트를 하고 싶을 때 조금 힘든 구조가 될 수도 있다. 그렇기 때문에 해당 내용을 옮기면서 추가한 부분이라고 생각하면 좋을 것 같다.
+
+# 마무리
+
+이는 프로젝트의 목적보다는 좋은 솔루션의 공유의 목적이 크다. 그만큼 내부적인 로직보다는 아키텍처부분에 신경을 많이 써서 그 점을 생각하면 더 좋을 것 같다. 그리고 추가로 `commonjs` 를 통한 `bulletproof 구조`는 많이 정보가 없다 생각이 든다. `commonjs`를 통해서 제대로 하려면 해당 코드에서 DI구조를 참고하고, 추가로 jsDOcs를 통해서 타입이 없지만, 최대한 타입에 대한 명시를 할 수 있도록 하는 것이 좋다 생각된다.

@@ -1,3 +1,5 @@
+const { user } = require('./events')
+
 class UserSubscriber {
     constructor(queue) {
         this.queue = queue
@@ -7,10 +9,10 @@ class UserSubscriber {
     processJob = async (job) => {
         const { name, data } = job
         switch (name) {
-            case 'onUserLogin':
+            case user.userEvents:
                 await this.handleLogin(data)
                 break
-            case 'onUserJoin':
+            case user.userEvents:
                 await this.handleJoin(data)
                 break
             default:
@@ -28,14 +30,15 @@ class UserSubscriber {
     async handleJoin({ email }) {
         try {
             console.log(`Sent welcome email to: ${email}`)
+            // 가입 메일 보내는 로직 추가
         } catch (error) {
             console.error(`Failed to send welcome email to: ${email}`, error)
         }
     }
 
     initialize() {
-        this.queue.process('onUserLogin', this.processJob.bind(this))
-        this.queue.process('onUserJoin', this.processJob.bind(this))
+        this.queue.process(userEvents.login, this.processJob.bind(this))
+        this.queue.process(userEvents.join, this.processJob.bind(this))
 
         this.queue.on('completed', (job) => {
             console.log(`Completed job: ${job.id}`)
